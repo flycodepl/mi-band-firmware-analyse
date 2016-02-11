@@ -1,0 +1,22 @@
+#!/usr/bin/env escript
+%%! -noshell -noinput
+%% -*- mode: erlang;erlang-indent-level: 4;indent-tabs-mode: nil -*-
+%% ex: ft=erlang ts=4 sw=4 et
+
+main([InputFilename]) ->
+    {ok, FW} = file:read_file(InputFilename),
+    {ok, Version} = get_version(FW),
+    IntCRC = erlang:crc32(FW),
+    
+    Info = #{file_name => filename:basename(InputFilename),
+             version => Version,
+             crc32 => integer_to_list(IntCRC, 16)
+            },
+    io:format("~p~n", [Info]).
+
+    
+
+get_version(<<_Header:1056/binary, Version:4/binary, _Rest/binary>>) ->
+    <<Revision,Build,Minor,Major>> = Version,
+    ParsedVersion = {Major,Minor,Build,Revision},
+    {ok, ParsedVersion}.
