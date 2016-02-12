@@ -51,6 +51,8 @@ $ ./parse_fw fw/1.8.711/Mili.fw
 | 1.8.511 | 1.0.12.0 | F6662DE3 | ? | ? | ? | ? | ? |
 | 1.8.711 | 1.0.12.0 | F6662DE3 | ? | ? | ? | ? | ? |
 
+In two latest versions of Mi Fit (1.8.511 and 1.8.711) was added new firmware file - HM05.fw
+
 # Mili.hw
 
 I'm not sure that this is correct
