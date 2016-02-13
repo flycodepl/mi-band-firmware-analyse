@@ -21,13 +21,29 @@ main([InputFilename]) ->
             },
     io:format("~p~n", [Info]).
 
-%% mili_hr has additional 24b headers. Rest is like in Mili
+%% @doc mili_hr has additional 24b headers. Rest is like in Mili
 get_version(mili_hr, <<_SkipMiliHRHeader:16#24/binary, Rest/binary>>) ->
     get_version(mili, Rest);
 get_version(mili, <<_Header:1056/binary, Version:4/binary, _Rest/binary>>) ->
     <<Revision,Build,Minor,Major>> = Version,
     ParsedVersion = {Major,Minor,Build,Revision},
-    {ok, ParsedVersion}.
+    {ok, ParsedVersion};
+%% @doc running firmware has version in ASCII.
+%% Firmwares below version 0.2.5 doesn't has 'version string'...
+%% @end
+get_version(running, <<_Header:1056/binary, Version:6/binary, _Rest/binary>>) ->
+    case Version of
+        <<255,255,255,255,255,255>> ->
+            {error, unknown_version};
+        <<$v, Major, $., Minor, $., Build>> ->
+            %% int nw = ((newVMajor & 0xff) << 16) | ((newVMinor & 0xff) << 8) | (newVRev & 0xff);
+            %% V = ((Major band 16#FF) bsl 16) bor ((Minor band 16#FF) bsl 8) bor (Build band 16#FF),
+            IntVersion = [ list_to_integer([X]) || X <- [Major, Minor, Build] ],
+            ParsedVersion = list_to_tuple(IntVersion),
+            {ok, ParsedVersion}
+    end.
+
+
 
 guess_type(<<?MILI_HR, _Rest/binary>>) -> {ok, mili_hr};
 guess_type(<<?MILI,    _Rest/binary>>) -> {ok, mili};
