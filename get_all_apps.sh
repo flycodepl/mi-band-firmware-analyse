@@ -59,7 +59,6 @@ echo "Downloading APK list"
 curl -# -L "${APK_HOST}${APK_LIST}" > "${TMP_LIST}"
 echo "Parse APK list"
 LIST_OF_APK=`xidel ${TMP_LIST} -s --extract '//h5[starts-with(@title, "Mi Fit")]/a/@href'`
-echo $LIST_OF_APK
 for i in $LIST_OF_APK; do
-    echo download_apk $i
+    download_apk $i
 done
