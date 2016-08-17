@@ -5,7 +5,7 @@ set -e
 
 
 APK_HOST="http://www.apkmirror.com"
-APK_LIST="/uploads/?app=mi-fit"
+APK_LIST="/uploads/?q=mi-fit"
 
 APK_DIR="./apps/"
 FW_DIR="./fw/"
@@ -17,18 +17,21 @@ TMP_APK_SITE="${TMP_DIR}/apk_download_site"
 
 function download_apk {    
     echo -e "\nDownload apk site"
-    curl -# "${APK_HOST}${1}" > "${TMP_APK_SITE}"
-    FULL_NAME_APK=`xidel ${TMP_APK_SITE} -q --extract  '//h1/@title'`
+    curl -# -L "${APK_HOST}${1}" > "${TMP_APK_SITE}"
+    FULL_NAME_APK=`xidel ${TMP_APK_SITE} -s --extract  '//h1/@title'`
     APK_VERSION=`echo ${FULL_NAME_APK} | sed 's#Mi Fit ##g'`
-    APK_URL=`xidel ${TMP_APK_SITE} -q --extract '//div[matches(@class, "hidden-xs")]//a[@type="button" and matches(@class, "downloadButton")]/@href'`
+    DL_PAGE_URL=`xidel ${TMP_APK_SITE} -s --extract '//a[@type="button" and matches(@class, "downloadButton")]/@href'`
     THIS_APK_DIR="${APK_DIR}${APK_VERSION}"
     APK_FILE="${THIS_APK_DIR}/base_${APK_VERSION}.apk"
     if [ -e ${APK_FILE} ]; then
         echo "APK ${APK_FILE} already exist - skipping downloading..."
     else
-        echo "Download ${FULL_NAME_APK} from ${APK_URL}"
+        echo "Fetching download link for ${FULL_NAME_APK} from ${APK_HOST}${DL_PAGE_URL}"
+	curl -# -L "${APK_HOST}${DL_PAGE_URL}" > "${TMP_APK_SITE}"
+	APK_URL=`xidel ${TMP_APK_SITE} -s --extract '//a[matches(@data-google-vignette, "false")]/@href'`
+        echo "Download ${FULL_NAME_APK} from ${APK_HOST}${APK_URL}"
         mkdir -p "${THIS_APK_DIR}"
-        curl -# -L "${APK_URL}" > "${APK_FILE}"
+        curl -# -L "${APK_HOST}${APK_URL}" > "${APK_FILE}"
     fi
 
     echo "Unzip base_${APK_VERSION}.apk"
@@ -56,9 +59,9 @@ function copy_fw {
 
 mkdir -p "${TMP_DIR}"
 echo "Downloading APK list" 
-curl -# "${APK_HOST}${APK_LIST}" > "${TMP_LIST}"
+curl -# -L "${APK_HOST}${APK_LIST}" > "${TMP_LIST}"
 echo "Parse APK list"
-LIST_OF_APK=`xidel ${TMP_LIST} -q --extract '//h3[starts-with(@title, "Mi Fit") and matches(@class, "hidden-xs")]/a/@href'`
+LIST_OF_APK=`xidel ${TMP_LIST} -s --extract '//h5[starts-with(@title, "Mi Fit")]/a/@href'`
 for i in $LIST_OF_APK; do
     download_apk $i
 done
