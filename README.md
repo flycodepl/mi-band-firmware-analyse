@@ -81,3 +81,7 @@ I'm not sure that this is correct
 | 0x0 | 0x24 | data | header - only in Mili_hr.fr. Information about firmware for AMS AS7000 |
 | 0x1A | 4 | offset | start heart rate biosensor firmware (AS7000) |
 | 0x1E | 4 | size | size of heart rate biosensor firmware (AS7000) |
+
+
+# NOTES
+https://github.com/shesko/DA14580_HeartMonitor/blob/master/dk_apps/src/modules/app/src/app_project/sps/app_sps_device_project.h
