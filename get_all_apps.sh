@@ -3,7 +3,6 @@
 set -e
 
 APK_HOST="http://www.apkmirror.com"
-APK_LIST="/uploads/?q=mi-fit"
 
 APK_DIR="./apps/"
 FW_DIR="./fw/"
@@ -90,6 +89,28 @@ function usage {
 	echo -e "\t-f|--force - Download APK even when corresponding file for this version already exist"
 }
 
+function get_list_of_apk {
+	local PAGE=${1-1}
+	local PREVIOUS_PAGE=$2
+	APK_LIST_PAGE="/uploads/page${PAGE}/?q=mi-fit"
+	LIST_OF_APK=$(do_get_list_of_apk $APK_LIST_PAGE $PAGE "${PREVIOUS_PAGE}")
+	echo $LIST_OF_APK
+}
+
+function do_get_list_of_apk {
+	local APK_LIST_PAGE=$1
+	local PAGE=$2
+	local PREVIOUS_PAGE=$3
+	curl -# -L "${APK_HOST}${APK_LIST_PAGE}" > "${TMP_LIST}"
+	LIST_OF_APK=`xidel ${TMP_LIST} -s --extract '//h5[starts-with(@title, "Mi Fit")]/a/@href'`
+	NEXT_PAGE=`xidel ${TMP_LIST} -s --extract '//div[@class="pagination desktop"]//a[@class="nextpostslink"]'`
+	 if [ -n "${NEXT_PAGE}" ]; then
+		 echo $(get_list_of_apk $(($PAGE+1)) "${LIST_OF_APK}")
+	 else
+		 echo "${PREVIOUS_PAGE} ${LIST_OF_APK}"
+	 fi
+}
+
 while [[ $# -gt 0 ]]; do
 	case $1 in
 		-u|--unzip)
@@ -112,10 +133,10 @@ done
 [ ${UNZIP} -eq 0 ] && echo -e "UNZIP is \e[4menabled\e[24m" || echo -e "UNZIP is disabled - for enable, set --unzip"
 
 mkdir -p "${TMP_DIR}"
-echo "Downloading APK list" 
-curl -# -L "${APK_HOST}${APK_LIST}" > "${TMP_LIST}"
-echo "Parse APK list"
-LIST_OF_APK=`xidel ${TMP_LIST} -s --extract '//h5[starts-with(@title, "Mi Fit")]/a/@href'`
+
+echo "Downloading list of APK..."
+LIST_OF_APK=$(get_list_of_apk)
+
 for i in $LIST_OF_APK; do
     download_apk $i
 done
