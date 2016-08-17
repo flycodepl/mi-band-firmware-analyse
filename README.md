@@ -6,7 +6,12 @@ After download, each APK is unzipping and all firmwares (i.e Mili.fw, running.fw
 * [xidel](http://www.videlibri.de/xidel.html)
 
 ### usage
-./get_all_apps.sh
+./get_all_apps.sh [-f | -u ]
+
+```
+-u|--unzip - auto-unzip each APK and copy FW to separate directory"
+-f|--force - Download APK even when corresponding file for this version already exist"
+```
 
 # parse_fw
 Simple script (escript) writted in Erlang. Allow extract firmware version from Mili.hr
