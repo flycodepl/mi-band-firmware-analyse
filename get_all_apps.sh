@@ -16,8 +16,8 @@ FORCE=1 # default 1 (false)
 UNZIP=1 # default 1 (false)
 
 function download_apk {    
-    echo -e "\nDownload apk site"
-    curl -# -L "${APK_HOST}${1}" > "${TMP_APK_SITE}"
+    echo -e "\nDownload apk site..."
+    curl -s -L "${APK_HOST}${1}" > "${TMP_APK_SITE}"
     local FULL_NAME_APK=`xidel ${TMP_APK_SITE} -s --extract  '//h1/@title'`
     local APK_VERSION=`echo ${FULL_NAME_APK} | sed 's#Mi Fit ##g'`
 	local THIS_APK_DIR="${APK_DIR}${APK_VERSION}"
@@ -52,7 +52,7 @@ function do_download_apk {
         echo "APK ${APK_FILE} already exist - skipping downloading..."
     elif [ ! -e ${APK_FILE} ] || [ ${FORCE} -eq 0 ]; then # download if don't exist or FORCE is set
         echo "Fetching download link for ${FULL_NAME_APK} from ${APK_HOST}${DL_PAGE_URL}"
-		curl -# -L "${APK_HOST}${DL_PAGE_URL}" > "${TMP_APK_SITE}"
+		curl -s -L "${APK_HOST}${DL_PAGE_URL}" > "${TMP_APK_SITE}"
 		APK_URL=`xidel ${TMP_APK_SITE} -s --extract '//a[matches(@data-google-vignette, "false")]/@href'`
         echo "Download ${FULL_NAME_APK} from ${APK_HOST}${APK_URL}"
         mkdir -p "${THIS_APK_DIR}"
@@ -107,6 +107,7 @@ while [[ $# -gt 0 ]]; do
 	esac
 
 done
+
 [ ${FORCE} -eq 0 ] && echo -e "FORCE is \e[4menabled\e[24m" || echo -e "FORCE is disabled - for enable, set --force"
 [ ${UNZIP} -eq 0 ] && echo -e "UNZIP is \e[4menabled\e[24m" || echo -e "UNZIP is disabled - for enable, set --unzip"
 
