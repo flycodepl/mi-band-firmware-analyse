@@ -80,7 +80,7 @@ function copy_fw {
     DIR_FOR_FW="${FW_DIR}${APK_VERSION}"
     mkdir -p "${DIR_FOR_FW}"
     echo "copy all firmwares to ${DIR_FOR_FW}"
-    cp -n ${UNZIP_APK_DIR}/assets/*.fw $DIR_FOR_FW
+    rsync -a --include '*.fw' --include '*.ft' --include '*.ft.en' --exclude '*' ${UNZIP_APK_DIR}/assets/ $DIR_FOR_FW
 }
 
 function usage {
